@@ -3,5 +3,6 @@ module.exports = {
   "password": "lolzinho",
   "database": "instagram",
   "host": "127.0.0.1",
-  "dialect": "mysql"
+  "dialect": "mysql",
+
 }

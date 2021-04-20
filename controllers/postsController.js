@@ -1,50 +1,53 @@
-const { Post } = require('../models');
+const { request } = require('express');
+const { Post } = require('../models/');
 
 const postsController = {
-    index: async (req, res) => {
-        let posts = await Post.findAll()
-        return res.json(posts)
+    index: async (request, response) => {
+        const posts = await Post.findAll();
+
+        return response.render('index', { listaPosts: posts });
     },
-    show: async (req, res) => {
-        let { id } = req.params
-        let postsFound = await Post.findAll({
+    show: async(request, response) => {
+        const { usuarios_id } = request.params;
+
+        const postsUsuario = await Post.findAll({
             where: {
-                usuarios_id: id
+                usuarios_id
             }
+        });
+
+        return response.json(postsUsuario);
+    },
+    create: async (request, response) => {
+        const { texto, img, usuarios_id } = request.body;
+        
+        const novoPost = Post.create({
+            texto, img, usuarios_id
         })
 
-        return res.json(postsFound)
+        return response.json(novoPost);
     },
-    create: async (req, res) => {
-        const { texto, img, usuarios_id, n_likes } = req.body
-        let novoPost = await Post.create({
-            texto,
-            img,
-            usuarios_id,
-            n_likes
+    update: async (request, response) => {
+        const { id } = request.params;
+        const { texto, img, usuarios_id } = request.body;
+        
+        const postAtualizado = Post.update({
+            texto, img, usuarios_id
+        }, {
+            where: {id}
         })
-        return res.json(novoPost)
+
+        return response.json(postAtualizado);
     },
-    update: async (req, res) => {
-        const { id } = req.params
-        const { usuarios_id } = req.body
-        const postAtt = await Post.update({
-            usuarios_id
-        },
-        {
-            where: { id }
+    delete: async (request, response) => {
+        const { id } = request.params;
+        
+        const postDeletado = Post.destroy({
+            where: {id}
         })
-        return res.json(postAtt)
-    },
-    delete: async (req, res) => {
-        const { id } = req.params
-        const postDel = await Post.destroy(
-        {
-            where: { id }
-        })
-        return res.json(postDel)
+
+        return response.json(postDeletado);
     }
-}
+}   
 
 module.exports = postsController;
-
