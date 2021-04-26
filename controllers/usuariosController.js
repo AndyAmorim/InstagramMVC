@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const { Usuario, sequelize } = require('../models/');
 
 const usuariosController = {
@@ -5,17 +6,39 @@ const usuariosController = {
         const usuarios =  await Usuario.findAll();
         
         return response.render('usuarios', { listaUsuarios: usuarios });
-    },  
+    }, 
+    login: (request, response) => {
+        return response.render('login');
+    }, 
+    auth: async (request, response) => {
+        const { email, senha } = request.body;
+
+        const usuario = await Usuario.findOne({
+            where: { email }
+        });
+
+        if (usuario && bcrypt.compareSync(senha, usuario.senha)) {
+            request.session.usuarioLogado = usuario; //criando atributo usuarioLogado na session
+            return response.redirect('/'); // redirecionando para pagina inicial
+        } else {
+            return response.redirect('/usuarios/login');
+        }
+    },
+    registro: (request, response) => {
+        return response.render('registro');
+    },
     create: async (request, response) => {
         const {nome, email, senha} = request.body;
+
+        const senhaCrypt = bcrypt.hashSync(senha, 10);
 
         const novoUsuario = await Usuario.create({
             nome,
             email,
-            senha
+            senha: senhaCrypt
         });
 
-        return response.json(novoUsuario);
+        return response.redirect('/usuarios/login');
     },
     update: async (request, response) => {
         const { id } = request.params;
